@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tech Trends Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #f4f6f9; }
+    /* Login Screen */
+    #loginScreen { display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(to right, #2b5876, #4e4376); }
+    #loginBox { background: white; padding: 30px; border-radius: 10px; width: 300px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center; }
+    #loginBox h2 { margin-bottom: 20px; }
+    #loginBox input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+    #loginBox button { padding: 10px 20px; background: #4e4376; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    #dashboard { display: none; }
+    /* Sidebar */
+    .sidebar { width: 220px; background: #2b5876; height: 100vh; position: fixed; top: 0; left: 0; color: white; padding-top: 20px; }
+    .sidebar h2 { text-align: center; margin-bottom: 20px; }
+    .sidebar a { display: block; padding: 12px 20px; color: white; text-decoration: none; margin: 5px 0; transition: background 0.3s; }
+    .sidebar a:hover { background: #4e4376; }
+    /* Content */
+    .content { margin-left: 240px; padding: 20px; min-height: 100vh; }
+    .content.with-bg { 
+      background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT13YFtmYvYxpyfhC-cjUqZZPxNlk_h-r7lkg&s') center/cover no-repeat; 
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+    .card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.3s; }
+    .card:hover { transform: scale(1.03); }
+    .card img { width: 100%; height: 160px; object-fit: cover; }
+    .card h3 { padding: 15px; margin: 0; }
+    .details img { width: 100%; border-radius: 10px; margin-bottom: 15px; }
+    .details h2 { margin-top: 0; }
+    /* Registration Form */
+    #registrationForm input, #registrationForm select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 5px; border: 1px solid #ccc; }
+    #registrationForm h3 { margin-top: 20px; }
+    #registrationForm button { width: 100%; margin-top: 15px; background:#4e4376; color:white; padding:10px; border:none; border-radius:5px; cursor:pointer; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    table, th, td { border: 1px solid #ccc; }
+    th, td { padding: 10px; text-align: left; }
+    th { background-color: #2b5876; color: white; }
+  </style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="loginScreen">
+  <div id="loginBox">
+    <h2 id="loginTitle">Login</h2>
+    <div id="loginForm">
+      <input type="text" id="username" placeholder="Full Name"><br>
+      <input type="email" id="email" placeholder="Email"><br>
+      <input type="password" id="password" placeholder="Password"><br>
+      <button onclick="login()">Login</button>
+      <p style="margin-top:10px; color:blue; cursor:pointer;" onclick="showForgotPassword()">Forgot Password?</p>
+    </div>
+    <div id="forgotForm" style="display:none;">
+      <input type="email" id="forgotEmail" placeholder="Enter your email"><br>
+      <button onclick="resetPassword()">Submit</button><br>
+      <p style="margin-top:10px; color:blue; cursor:pointer;" onclick="showLogin()">Back to Login</p>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard">
+  <div class="sidebar">
+    <h2><i class="fas fa-laptop-code"></i> Dashboard</h2>
+    <a href="#" onclick="loadHome()"><i class="fas fa-home"></i> Home</a>
+    <a href="#" onclick="loadProfile()"><i class="fas fa-user"></i> Profile</a>
+    <a href="#" onclick="loadAssignments()"><i class="fas fa-book"></i> Assignments</a>
+    <a href="#" onclick="loadRegistrationForm()"><i class="fas fa-user-graduate"></i> Student Registration</a>
+    <a href="#" onclick="loadRegisteredStudents()"><i class="fas fa-users"></i> View Registered Students</a>
+    <a href="#" onclick="loadMyCourses()"><i class="fas fa-chart-line"></i> My Courses</a>
+    <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+  <div class="content" id="contentArea"></div>
+</div>
+
+<script>
+let loggedUser = {};
+let students = []; // Array to store registered students
+
+function login() {
+  const name = document.getElementById("username").value;
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("password").value;
+  if(name && email && pass){
+    loggedUser = {name, email};
+    document.getElementById("loginScreen").style.display="none";
+    document.getElementById("dashboard").style.display="block";
+    loadHome();
+  } else {
+    alert("Please enter all fields");
+  }
+}
+
+function showForgotPassword() {
+  document.getElementById("loginForm").style.display="none";
+  document.getElementById("forgotForm").style.display="block";
+  document.getElementById("loginTitle").innerText = "Forgot Password";
+}
+
+function showLogin() {
+  document.getElementById("forgotForm").style.display="none";
+  document.getElementById("loginForm").style.display="block";
+  document.getElementById("loginTitle").innerText = "Login";
+}
+
+function resetPassword() {
+  const email = document.getElementById("forgotEmail").value;
+  if(email){
+    alert(`Password reset link sent to ${email}`);
+    showLogin();
+  } else {
+    alert("Enter your email");
+  }
+}
+
+function logout() {
+  if(confirm("Are you sure you want to logout?")){
+    document.getElementById("dashboard").style.display="none";
+    document.getElementById("loginScreen").style.display="flex";
+    document.getElementById("username").value="";
+    document.getElementById("email").value="";
+    document.getElementById("password").value="";
+  }
+}
+
+// Load pages inside content area
+function loadHome(){
+  document.getElementById("contentArea").classList.remove('with-bg'); 
+  let content = `
+    <h2>Top 6 Tech Trends</h2>
+    <div class="grid">
+      ${techTrends.map((tech,i)=>`
+        <div class="card" onclick="loadDetails(${i})">
+          <img src="${tech.img}" alt="${tech.title}">
+          <h3>${tech.title}</h3>
+        </div>
+      `).join("")}
+    </div>`;
+  document.getElementById("contentArea").innerHTML=content;
+}
+
+function loadDetails(i){
+  document.getElementById("contentArea").classList.add('with-bg'); 
+  let t = techTrends[i];
+  document.getElementById("contentArea").innerHTML=`  
+    <div class="details">
+      <h2>${t.title}</h2>
+      <img src="${t.img}" alt="${t.title}">
+      <p><b>What it is:</b> ${t.what}</p>
+      <p><b>Why it’s Trending:</b> ${t.trend}</p>
+      <p><b>Why People Should Learn:</b> ${t.why}</p>
+      <button onclick="loadHome()">⬅ Back to Home</button>
+    </div>`;
+}
+
+function loadProfile(){
+  document.getElementById("contentArea").classList.add('with-bg');
+  document.getElementById("contentArea").innerHTML=`  
+    <h2>Profile</h2>
+    <p><b>Name:</b> ${loggedUser.name}</p>
+    <p><b>Email:</b> ${loggedUser.email}</p>`;
+}
+
+function loadAssignments(){
+  document.getElementById("contentArea").classList.add('with-bg');
+  document.getElementById("contentArea").innerHTML=`  
+    <h2>Assignments</h2>
+    <p>No new assignments today.</p>`;
+}
+
+function loadMyCourses(){
+  document.getElementById("contentArea").classList.add('with-bg');
+  document.getElementById("contentArea").innerHTML=`  
+    <h2>My Courses</h2>
+    <p>You are enrolled in 3 courses.</p>`;
+}
+
+// Student Registration Form
+function loadRegistrationForm(){
+  document.getElementById("contentArea").classList.remove('with-bg'); 
+  document.getElementById("contentArea").innerHTML = `
+    <h2>Student Registration Form</h2>
+    <form id="registrationForm">
+      <h3>Personal Details</h3>
+      <input type="text" id="studentID" placeholder="Student ID" required>
+      <input type="date" id="dob" placeholder="Date of Birth" required>
+      <select id="gender" required>
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <h3>Contact Details</h3>
+      <input type="text" id="address" placeholder="Address" required>
+      <input type="tel" id="phone" placeholder="Phone Number" required>
+      <input type="text" id="parentName" placeholder="Parent / Guardian Name" required>
+
+      <h3>Academic Details</h3>
+      <input type="text" id="class" placeholder="Class / Grade" required>
+      <input type="number" id="yearOfStudy" placeholder="Year of Study" required>
+
+      <button type="submit">Submit Registration</button>
+    </form>
+  `;
+
+  // Handle form submission
+  document.getElementById('registrationForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const student = {
+      studentID: document.getElementById('studentID').value,
+      dob: document.getElementById('dob').value,
+      gender: document.getElementById('gender').value,
+      address: document.getElementById('address').value,
+      phone: document.getElementById('phone').value,
+      parentName: document.getElementById('parentName').value,
+      class: document.getElementById('class').value,
+      yearOfStudy: document.getElementById('yearOfStudy').value
+    };
+    students.push(student);
+    alert("Student registration successful!");
+    loadRegisteredStudents(); // Show all registered students after submission
+  });
+}
+
+// View Registered Students
+function loadRegisteredStudents(){
+  document.getElementById("contentArea").classList.remove('with-bg'); 
+  if(students.length === 0){
+    document.getElementById("contentArea").innerHTML = "<h2>Registered Students</h2><p>No students registered yet.</p>";
+    return;
+  }
+
+  let tableRows = students.map(s => `
+    <tr>
+      <td>${s.studentID}</td>
+      <td>${s.dob}</td>
+      <td>${s.gender}</td>
+      <td>${s.address}</td>
+      <td>${s.phone}</td>
+      <td>${s.parentName}</td>
+      <td>${s.class}</td>
+      <td>${s.yearOfStudy}</td>
+    </tr>
+  `).join("");
+
+  document.getElementById("contentArea").innerHTML = `
+    <h2>Registered Students</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>DOB</th>
+          <th>Gender</th>
+          <th>Address</th>
+          <th>Phone</th>
+          <th>Parent Name</th>
+          <th>Class/Grade</th>
+          <th>Year of Study</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${tableRows}
+      </tbody>
+    </table>
+  `;
+}
+
+const techTrends=[
+  { title:"Artificial Intelligence (AI)", img:"https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800", what:"AI is the ability of machines to simulate human intelligence and perform tasks that typically require reasoning, learning, and problem-solving.", trend:"It powers chatbots, autonomous vehicles, healthcare systems, and recommendation engines.", why:"AI skills are highly demanded and will shape the future of jobs." },
+  { title:"Machine Learning (ML)", img:"https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800", what:"Machine Learning allows systems to learn from data and improve performance without explicit programming.", trend:"From Netflix recommendations to fraud detection, ML is behind most data-driven solutions today.", why:"Learning ML opens career paths in data science and AI development." },
+  { title:"Cloud Computing", img:"https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800", what:"Cloud computing delivers servers, storage, and networking over the internet.", trend:"It allows businesses to scale quickly and reduce infrastructure costs.", why:"Knowledge of cloud platforms like AWS and Azure is essential for modern IT careers." },
+  { title:"Cybersecurity", img:"https://images.unsplash.com/photo-1605902711622-cfb43c44367f?w=800", what:"Cybersecurity protects systems and data from cyber threats and unauthorized access.", trend:"Data protection has become critical for governments and businesses.", why:"Cybersecurity expertise offers strong job security across industries." },
+  { title:"Internet of Things (IoT)", img:"https://images.unsplash.com/photo-1581092787761-3f57c3d9c5f3?w=800", what:"IoT connects physical devices to the internet to collect and exchange data.", trend:"Smart homes, wearables, and industrial IoT are booming.", why:"IoT knowledge is vital for future innovations in automation and smart cities." },
+  { title:"Blockchain", img:"https://images.unsplash.com/photo-1649972904349-d9225f70a5ec?w=800", what:"Blockchain is a decentralized digital ledger used to record transactions securely.", trend:"It powers cryptocurrencies, smart contracts, and supply chain transparency.", why:"Blockchain is reshaping finance and digital identity; skills in it are highly rewarded." }
+];
+</script>
+</body>
+</html>
